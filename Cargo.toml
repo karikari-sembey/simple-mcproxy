@@ -1,0 +1,17 @@
+[package]
+name = "simple-mcproxy"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+tokio = { version = "1.49.0", features = [
+    "macros",
+    "rt-multi-thread",
+    "net",
+    "io-util",
+] }
+anyhow = { version = "1.0.100" }
+log = { version = "*" }
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = { version = "1.0.149" }
+env_logger = { version = "0.11.8" }

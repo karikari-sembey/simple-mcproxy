@@ -1,0 +1,14 @@
+{
+    "config_version": 0,
+    "listen": "127.0.0.1:25565",
+    "servers": [
+        {
+            "hostname": "main.localhost",
+            "dest": "127.0.0.1:25566"
+        },
+        {
+            "hostname": "sub.localhost",
+            "dest": "localhost:25567"
+        }
+    ]
+}
