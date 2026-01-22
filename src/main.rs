@@ -24,15 +24,26 @@ async fn main() -> Result<()> {
         Err(error) => Err(error)?,
     };
 
+    log::info!("Simple MCProxy successfully initialized!");
+
     loop {
         let servers = conf.servers.clone();
         let default_server = conf.default_server.clone();
-        let (stream, _) = listener.accept().await?;
+        let stream = match listener.accept().await {
+            Ok((stream, addr)) => {
+                log::info!("Client connected from {addr}");
+                stream
+            }
+            Err(error) => {
+                log::error!("An error occurred while accepting client: {error}");
+                continue;
+            }
+        };
 
         tokio::spawn(async move {
             match connection(stream, servers.clone(), default_server).await {
                 Ok(_) => {}
-                Err(error) => println!("{error}"),
+                Err(error) => log::error!("{error}"),
             }
         });
     }
@@ -59,7 +70,13 @@ async fn connection(
         None => default_server,
     };
 
-    let server_stream = TcpStream::connect(server).await?;
+    let server_stream = match TcpStream::connect(&server).await {
+        Ok(stream) => stream,
+        Err(error) => {
+            log::error!("An error occurred while connectiong to backend server({server}): {error}");
+            Err(error)?
+        }
+    };
     let (server_rx, server_tx) = split(server_stream);
     let server_reader = BufReader::new(server_rx);
     let mut server_writer = BufWriter::new(server_tx);

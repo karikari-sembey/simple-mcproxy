@@ -3,6 +3,8 @@ use std::fs;
 use anyhow::Result;
 use serde::Deserialize;
 
+const CONFIG_PATH: &str = "./config/config.json";
+
 #[derive(Deserialize)]
 pub struct Config {
     #[allow(dead_code)]
@@ -14,8 +16,26 @@ pub struct Config {
 
 impl Config {
     pub fn read_config() -> Result<Config> {
-        let conf = fs::read_to_string("./config.json")?;
-        Ok(serde_json::from_str::<Config>(&conf).unwrap_or_default())
+        let conf_file = match fs::read_to_string(CONFIG_PATH) {
+            Ok(file) => file,
+            Err(error) => {
+                if error.kind() != std::io::ErrorKind::NotFound {
+                    log::error!("An error occurred while reading {CONFIG_PATH}: {error}");
+                    Err(error)?
+                }
+                log::warn!("Configuration file not found");
+                String::new()
+            }
+        };
+
+        Ok(match serde_json::from_str::<Config>(&conf_file) {
+            Ok(conf) => conf,
+            Err(error) => {
+                log::error!("An error occurred while parsing config: {error}");
+                log::warn!("Default config has been loaded");
+                Config::default()
+            }
+        })
     }
 }
 
