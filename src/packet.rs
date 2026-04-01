@@ -34,7 +34,7 @@ impl Packet {
         let port = read_ushort(&mut bytes)?;
         let intent = match read_varint(&mut bytes)? {
             1 => State::Status,
-            2 => State::Login,
+            2 | 3 => State::Login,
             _ => return Err(anyhow!("wrong intent")),
         };
         Ok(Packet::Handshake(HandshakePacket {
