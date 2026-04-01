@@ -35,7 +35,7 @@ impl Packet {
         let intent = match read_varint(&mut bytes)? {
             1 => State::Status,
             2 | 3 => State::Login,
-            _ => return Err(anyhow!("wrong intent")),
+            fallback => return Err(anyhow!("wrong intent: {fallback}")),
         };
         Ok(Packet::Handshake(HandshakePacket {
             server,
